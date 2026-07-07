@@ -1,0 +1,329 @@
+/* ==========================================================================
+   SERIES EXPLORER — buscador, comparador y detalle de series de tiempo
+   (apis.datos.gob.ar/series). Self-contained: no depende de ningún otro
+   theme/extensión — todo scopeado a .series-page, con sus propios tokens de
+   marca (identidad "Datos Abiertos": navy + índigo + violeta, Montserrat).
+   Si el portal además usa ckanext-gobar-theme, ambos sets de variables
+   coexisten sin choque (mismos valores, mismo namespace --gobar-*).
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+
+body.series-page {
+  --gobar-navy: #212D51;
+  --gobar-indigo: #393793;
+  --gobar-indigo-dark: #2D2B73;
+  --gobar-violeta: #B369ED;
+  --gobar-rojo: #C62828;
+  --gobar-primary: var(--gobar-indigo);
+  --gobar-negro: #333333;
+  --gobar-gris-oscuro: #555555;
+  --gobar-gris: #888888;
+  --gobar-gris-claro: #CCCCCC;
+  --gobar-gris-bg: #F2F2F2;
+  --font-titulos: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+  --font-cuerpo: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+
+  font-family: var(--font-cuerpo);
+  color: var(--gobar-negro);
+}
+body.series-page h1, body.series-page h2, body.series-page h3 { font-family: var(--font-titulos); }
+body.series-page .btn-primary {
+  background-color: var(--gobar-primary) !important; border-color: var(--gobar-primary) !important;
+  font-family: var(--font-cuerpo); font-weight: 600;
+}
+body.series-page .btn-primary:hover, body.series-page .btn-primary:focus {
+  background-color: var(--gobar-indigo-dark) !important; border-color: var(--gobar-indigo-dark) !important;
+}
+
+/* ── Paleta dataviz de la comparación (NO es paleta de marca) ──
+   4 colores CVD-safe en orden fijo por posición del id en `compare`.
+   El primero (violeta de marca) nunca rota. */
+body.series-page {
+  --gobar-serie-1: #B369ED; /* violeta (marca) */
+  --gobar-serie-2: #1baf7a; /* aqua */
+  --gobar-serie-3: #eda100; /* ámbar (contraste warning → siempre con texto) */
+  --gobar-serie-4: #2a78d6; /* azul */
+}
+@media (prefers-color-scheme: dark) {
+  body.series-page {
+    --gobar-serie-2: #199e70;
+    --gobar-serie-3: #c98500;
+    --gobar-serie-4: #3987e5;
+  }
+}
+
+.serie-dot--1 { background: var(--gobar-serie-1); }
+.serie-dot--2 { background: var(--gobar-serie-2); }
+.serie-dot--3 { background: var(--gobar-serie-3); }
+.serie-dot--4 { background: var(--gobar-serie-4); }
+body.series-page .serie-dot {
+  flex: none; width: 12px; height: 12px; border-radius: 3px; margin-top: 4px;
+}
+
+body.series-page .mono {
+  font-family: 'SFMono-Regular', 'Menlo', 'Consolas', monospace;
+}
+
+body.series-page .gobar-series { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
+body.series-page .gobar-section-title { font-size: 1.25rem; margin: 0 0 16px; color: var(--gobar-navy); }
+
+/* ── Caja de búsqueda (pill) ── */
+body.series-page .gobar-series-search { display: flex; gap: 10px; }
+body.series-page .gobar-series-search input[type="search"] {
+  flex: 1; border: 2px solid var(--gobar-primary); border-radius: 25px;
+  padding: 10px 20px; font-size: 1rem; font-family: var(--font-cuerpo);
+  outline: none; box-shadow: none; background: #fff; min-width: 0;
+}
+body.series-page .gobar-series-search button { flex: none; border-radius: 25px; padding: 0 24px; }
+
+/* ── Landing: hero + chips ── */
+body.series-page .gobar-series-hero {
+  text-align: center; padding: 24px 0 32px; margin-bottom: 8px;
+}
+body.series-page .gobar-series-hero-title { color: var(--gobar-navy); margin: 0 0 8px; }
+body.series-page .gobar-series-hero-sub { color: var(--gobar-gris-oscuro); margin: 0 0 24px; }
+body.series-page .gobar-series-hero .gobar-series-search { max-width: 720px; margin: 0 auto; }
+
+body.series-page .gobar-topic-chips {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 20px;
+}
+body.series-page .gobar-topic-chip {
+  display: inline-block; padding: 6px 16px; border-radius: 20px;
+  background: rgba(57, 55, 147, .08); color: var(--gobar-primary);
+  font-size: 0.8rem; font-weight: 600; text-decoration: none;
+}
+body.series-page .gobar-topic-chip:hover { background: rgba(57, 55, 147, .16); }
+
+/* ── Barra superior (resultados / comparación enfocada) ── */
+body.series-page .gobar-series-topbar { margin-bottom: 24px; }
+body.series-page .gobar-series-search--compact input[type="search"] { border-width: 1.5px; }
+
+/* ── Resultados: 2 columnas (filtros | lista) ── */
+body.series-page .gobar-results-layout {
+  display: grid; grid-template-columns: 250px 1fr; gap: 24px; align-items: start;
+}
+body.series-page .gobar-series-results { min-width: 0; }
+
+/* ── Barra de comparación: aparece en la toolbar cuando hay ≥1 serie marcada;
+   el botón "Comparar" solo con ≥2 (comparar una sola no tiene sentido). ── */
+body.series-page .gobar-compare-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin: -4px 0 16px; padding: 10px 16px; border-radius: 8px;
+  background: rgba(57, 55, 147, .08);
+}
+body.series-page .gobar-compare-bar-count { font-size: 0.85rem; color: var(--gobar-primary); font-weight: 600; }
+body.series-page .gobar-compare-bar .btn { border-radius: 20px; padding: 6px 20px; }
+
+/* ── Toolbar (resumen + orden) ── */
+body.series-page .gobar-series-toolbar {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+}
+body.series-page .gobar-series-summary { color: var(--gobar-gris-oscuro); font-size: 0.9rem; }
+
+/* ── Orden: 3 links (sin <select> ni JS) ── */
+body.series-page .gobar-series-sort { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+body.series-page .gobar-series-sort-label { font-size: 0.85rem; color: var(--gobar-gris-oscuro); }
+body.series-page .gobar-series-sort-link {
+  font-size: 0.85rem; color: var(--gobar-gris-oscuro); text-decoration: none;
+  padding: 4px 10px; border-radius: 14px;
+}
+body.series-page .gobar-series-sort-link:hover { background: var(--gobar-gris-bg); }
+body.series-page .gobar-series-sort-link.active {
+  color: var(--gobar-primary); font-weight: 600; background: var(--gobar-gris-bg);
+}
+
+/* ── Facetas: heredan estética de .gobar-facet (más abajo en este archivo) ── */
+body.series-page .gobar-series-facets .nav-facet .item-label { white-space: normal; overflow-wrap: anywhere; }
+
+/* ── Lista de resultados: filas angostas (NO cards con gráfico) ──
+   Dos áreas de click independientes: checkbox → toggle compare; resto → detalle. */
+body.series-page .gobar-series-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+body.series-page .gobar-serie-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  border: 1px solid var(--gobar-gris-claro); border-radius: 8px; padding: 12px 14px; background: #fff;
+  transition: border-color .15s ease, background .15s ease;
+}
+body.series-page .gobar-serie-row:hover { border-color: var(--gobar-primary); }
+body.series-page .gobar-serie-row.is-selected {
+  border-color: var(--gobar-primary); background: rgba(57, 55, 147, .06);
+}
+
+/* Checkbox = link estilizado */
+body.series-page .gobar-serie-check { flex: none; display: flex; align-items: center; padding-top: 2px; text-decoration: none; }
+body.series-page .gobar-serie-checkbox {
+  width: 18px; height: 18px; border: 2px solid var(--gobar-gris-claro); border-radius: 4px;
+  display: inline-block; position: relative; background: #fff;
+}
+body.series-page .gobar-serie-check:hover .gobar-serie-checkbox { border-color: var(--gobar-primary); }
+body.series-page .gobar-serie-row.is-selected .gobar-serie-checkbox {
+  border-color: var(--gobar-primary); background: var(--gobar-primary);
+}
+body.series-page .gobar-serie-row.is-selected .gobar-serie-checkbox::after {
+  content: ""; position: absolute; left: 4px; top: 0px; width: 5px; height: 10px;
+  border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+
+body.series-page .gobar-serie-main { flex: 1; min-width: 0; text-decoration: none; display: block; }
+body.series-page .gobar-serie-title { display: block; color: var(--gobar-navy); font-weight: 600; font-size: 0.95rem; line-height: 1.35; }
+body.series-page .gobar-serie-main:hover .gobar-serie-title { color: var(--gobar-primary); }
+body.series-page .gobar-serie-meta { display: block; margin-top: 4px; font-size: 0.78rem; color: var(--gobar-gris); }
+body.series-page .gobar-serie-meta-sub { margin-top: 2px; }
+body.series-page .gobar-serie-meta-sep { margin: 0 4px; }
+
+/* ── Lista de series en comparación (usada en la vista enfocada) ── */
+body.series-page .gobar-compare-list { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+body.series-page .gobar-compare-item { display: flex; align-items: flex-start; gap: 8px; }
+body.series-page .gobar-compare-item-body { flex: 1; min-width: 0; }
+body.series-page .gobar-compare-item-title { display: block; font-size: 0.85rem; font-weight: 600; color: var(--gobar-navy); line-height: 1.3; }
+body.series-page .gobar-compare-item-pub { display: block; font-size: 0.72rem; color: var(--gobar-gris); }
+body.series-page .gobar-compare-remove {
+  flex: none; color: var(--gobar-gris); text-decoration: none; font-size: 1.1rem; line-height: 1;
+  padding: 0 4px;
+}
+body.series-page .gobar-compare-remove:hover { color: var(--gobar-rojo); }
+body.series-page .gobar-compare-chart { min-height: 260px; }
+body.series-page .gobar-compare-chart--large { min-height: 460px; }
+
+/* ── Comparación enfocada: 2 paneles ── */
+body.series-page .gobar-focus-layout {
+  display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 24px; align-items: start;
+}
+body.series-page .gobar-focus-side {
+  border: 1px solid var(--gobar-gris-claro); border-radius: 12px; padding: 16px; background: #fff;
+}
+body.series-page .gobar-focus-main {
+  border: 1px solid var(--gobar-gris-claro); border-radius: 12px; padding: 16px; background: #fff;
+  box-sizing: border-box;
+}
+
+/* ── Estado vacío (sin resultados) ── */
+body.series-page .gobar-series-empty { text-align: center; padding: 48px 16px; max-width: 460px; margin: 0 auto; }
+body.series-page .gobar-series-empty-icon { color: var(--gobar-gris-claro); margin-bottom: 16px; }
+body.series-page .gobar-series-empty-title { font-size: 1.2rem; color: var(--gobar-navy); margin: 0 0 8px; }
+body.series-page .gobar-series-empty-copy { color: var(--gobar-gris-oscuro); font-size: 0.9rem; margin: 0 0 20px; }
+
+/* ── Estado (carga / error) ── */
+body.series-page .gobar-series-status {
+  padding: 40px 16px; text-align: center; color: var(--gobar-gris); font-size: 1rem;
+}
+
+/* ── Paginación ── */
+body.series-page .gobar-series-pagination {
+  display: flex; justify-content: center; align-items: center; gap: 16px; padding: 28px 0 0;
+}
+body.series-page .gobar-series-pagepos { color: var(--gobar-gris-oscuro); font-size: 0.9rem; }
+body.series-page .gobar-series-pagebtn.disabled,
+body.series-page .gobar-series-pagebtn:disabled { opacity: 0.45; cursor: default; pointer-events: none; }
+
+/* ══════════════════════ DETALLE DE SERIE ══════════════════════ */
+body.series-page .gobar-detail-breadcrumb { font-size: 0.82rem; color: var(--gobar-gris); margin-bottom: 16px; }
+body.series-page .gobar-detail-breadcrumb a { color: var(--gobar-gris-oscuro); text-decoration: none; }
+body.series-page .gobar-detail-breadcrumb a:hover { color: var(--gobar-primary); }
+body.series-page .gobar-detail-crumb-sep { margin: 0 6px; color: var(--gobar-gris-claro); }
+body.series-page .gobar-detail-crumb.is-current { color: var(--gobar-primary); font-weight: 600; }
+
+body.series-page .gobar-detail-head {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+  flex-wrap: wrap; margin-bottom: 20px;
+}
+body.series-page .gobar-detail-head-main { min-width: 0; }
+body.series-page .gobar-detail-title { margin: 0; color: var(--gobar-navy); font-size: 1.6rem; }
+body.series-page .gobar-detail-code { display: inline-block; margin-top: 6px; font-size: 0.78rem; color: var(--gobar-gris); }
+body.series-page .gobar-detail-source { display: inline-block; margin: 6px 0 0 12px; font-size: 0.82rem; color: var(--gobar-gris-oscuro); }
+body.series-page .gobar-detail-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+body.series-page .gobar-btn-outline {
+  background: #fff !important; color: var(--gobar-primary) !important;
+  border: 1.5px solid var(--gobar-primary) !important; font-weight: 600;
+}
+body.series-page .gobar-btn-outline:hover { background: var(--gobar-gris-bg) !important; }
+
+/* Bug de TSComponents (components.css): `.exportable-graph div:not(.g-pickers-
+   container, [data-highcharts-chart]) { height: 100% }` es demasiado amplio y
+   también estira el menú de exportación de Highcharts (y cada item) a la
+   altura del contenedor del gráfico, dejando un menú enorme con los items
+   separados por cientos de px. Lo acotamos de vuelta a su alto natural. */
+body.series-page .exportable-graph .highcharts-contextmenu,
+body.series-page .exportable-graph .highcharts-menu-item {
+  height: auto !important;
+}
+
+body.series-page .gobar-detail-chart {
+  min-height: 420px; margin-bottom: 24px; box-sizing: border-box;
+  border: 1px solid var(--gobar-gris-claro); border-radius: 12px; padding: 16px; background: #fff;
+}
+
+body.series-page .gobar-detail-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+body.series-page .gobar-detail-card {
+  border: 1px solid var(--gobar-gris-claro); border-radius: 12px; padding: 18px; background: #fff;
+}
+body.series-page .gobar-detail-card-title { font-size: 1rem; margin: 0 0 14px; color: var(--gobar-navy); }
+body.series-page .gobar-detail-dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; }
+body.series-page .gobar-detail-dl dt { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--gobar-gris); margin: 0; }
+body.series-page .gobar-detail-dl dd { font-size: 0.85rem; color: var(--gobar-negro); margin: 0; }
+body.series-page .gobar-detail-dl-note { color: var(--gobar-gris); }
+
+body.series-page .gobar-detail-usage-block { margin-bottom: 14px; }
+body.series-page .gobar-detail-usage-block:last-child { margin-bottom: 0; }
+body.series-page .gobar-detail-usage-label { display: block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--gobar-gris); }
+body.series-page .gobar-detail-usage-stat { display: block; font-size: 1.5rem; font-weight: 700; color: var(--gobar-navy); margin-top: 2px; }
+
+/* ══════════════════════ RESPONSIVE ══════════════════════
+   Mobile: los filtros NO se anteponen a los resultados. En vez de columnas,
+   apilamos y usamos `order` para que la lista de resultados vaya primero, luego
+   comparación, y los filtros al final. */
+@media (max-width: 900px) {
+  body.series-page .gobar-results-layout,
+  body.series-page .gobar-focus-layout { grid-template-columns: 1fr; }
+  body.series-page .gobar-series-results { order: 1; }
+  body.series-page .gobar-series-facets { order: 2; }
+  body.series-page .gobar-compare-bar { flex-wrap: wrap; }
+}
+
+/* ══════════════════════ FACETAS (sidebar de filtros) ══════════════════════
+   Colapsables (<details>/<summary>), sin depender de otro theme. Usa
+   var(--gobar-*, fallback) para degradar con gracia si por algún motivo
+   estas variables no llegaran a resolverse. */
+body.series-page .gobar-facet.module {
+  border: none; box-shadow: none; background: transparent; margin-bottom: 0;
+}
+body.series-page .gobar-facet .gobar-facet-details {
+  border-bottom: 1px solid var(--gobar-gris-claro, #e0e0e0);
+}
+body.series-page .gobar-facet .gobar-facet-summary {
+  cursor: pointer; list-style: none; display: flex; align-items: center;
+  padding: 0.7rem 0.5rem; user-select: none; transition: color 0.15s ease;
+}
+body.series-page .gobar-facet .gobar-facet-summary:hover { color: var(--gobar-primary, #393793); }
+body.series-page .gobar-facet .gobar-facet-summary::-webkit-details-marker { display: none; }
+body.series-page .gobar-facet .gobar-facet-summary .module-heading {
+  flex: 1; margin: 0; padding: 0; border: none; background: none;
+  font-family: var(--font-titulos, Georgia, serif); font-size: 1rem; font-weight: 600;
+  line-height: 1.3; color: inherit;
+}
+body.series-page .gobar-facet .gobar-facet-summary::after {
+  content: ""; flex: none; width: 0.5rem; height: 0.5rem; margin-left: 0.75rem;
+  border-right: 2px solid var(--gobar-gris, #888); border-bottom: 2px solid var(--gobar-gris, #888);
+  transform: translateY(-2px) rotate(45deg); transition: transform 0.2s ease;
+}
+body.series-page .gobar-facet .gobar-facet-details[open] > .gobar-facet-summary::after {
+  transform: translateY(2px) rotate(225deg);
+}
+body.series-page .gobar-facet .gobar-facet-summary:hover::after { border-color: var(--gobar-primary, #393793); }
+body.series-page .gobar-facet nav .nav-facet { margin: 0 0 0.4rem; padding: 0; border: none; }
+body.series-page .gobar-facet .nav-facet > li,
+body.series-page .gobar-facet .nav-facet .nav-item,
+body.series-page .gobar-facet .nav-facet .nav-item:last-child,
+body.series-page .gobar-facet .module-content,
+body.series-page .gobar-facet .module-footer {
+  border: 0 !important; background: none;
+}
+body.series-page .gobar-facet nav .nav-facet .nav-item > a {
+  padding: 0.3rem 0.5rem; border: 0 !important; display: inline-flex;
+  flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.4rem;
+}
+body.series-page .gobar-facet nav .nav-facet .nav-item > a:hover {
+  background: var(--gobar-gris-bg, #f2f2f2); border-radius: 6px; text-decoration: none;
+}
+body.series-page .gobar-facet .module-footer { padding: 0 0.5rem 0.5rem; }

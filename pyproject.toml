@@ -1,0 +1,38 @@
+[project]
+name = "ckanext-series-explorer"
+version = "0.1.0"
+description = "Buscador, comparador y visualizador de series de tiempo (apis.datos.gob.ar/series) para cualquier portal CKAN"
+readme = "README.md"
+authors = [
+    {name = "Alén Carbajal", email = "acarbajal@sicyt.gob.ar"}
+]
+license = {text = "AGPL"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+
+keywords = [ "CKAN", "series de tiempo", "datos abiertos" ]
+dependencies = [ "requests" ]
+
+[project.urls]
+Homepage = "https://github.com/datosgobar/ckanext-series-explorer"
+
+[project.entry-points."ckan.plugins"]
+series_explorer = "ckanext.series_explorer.plugin:SeriesExplorerPlugin"
+
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+        "ignore::sqlalchemy.exc.SADeprecationWarning",
+        "ignore::sqlalchemy.exc.SAWarning",
+        "ignore::DeprecationWarning",
+]
+addopts = "--ckan-ini test.ini"

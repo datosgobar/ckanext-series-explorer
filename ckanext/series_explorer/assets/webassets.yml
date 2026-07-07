@@ -1,0 +1,4 @@
+series_explorer_css:
+  output: series-explorer/%(version)s_series_explorer.css
+  contents:
+    - css/series-explorer.css

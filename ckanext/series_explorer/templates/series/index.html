@@ -1,0 +1,267 @@
+{% extends "page.html" %}
+
+{% block subtitle %}{{ page_title }}{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  {% asset 'series_explorer/series_explorer_css' %}
+  {# Poncho TSComponents (Graphic) + FontAwesome 5 que requiere. Recursos
+     externos: se cargan por CDN, no son bundleables por webassets. #}
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/gh/datosgobar/series-tiempo-ar-explorer@ts_components_2.9.0/dist/css/components.css"
+        integrity="sha384-tkchXtqoA5SypC6EEzm6Sou4DjQOwr59yrmv2WabofpCThBgUQ7aTWSV9MZXxbge" crossorigin="anonymous">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css"
+        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+{% endblock %}
+
+{% block bodytag %}{{ super() }} class="series-page series-mode-{{ mode }}"{% endblock %}
+
+{# ── Buscador: mismo form en todos los modos. Preserva las facetas activas
+   como hidden inputs para no perderlas al lanzar una búsqueda de texto. ── #}
+{% macro search_form(compact=False) %}
+  <form class="gobar-series-search{% if compact %} gobar-series-search--compact{% endif %}"
+        role="search" method="get" action="{{ h.url_for('series.series') }}">
+    {% for facet in facets %}
+      {% for item in facet['items'] if item.active %}
+        <input type="hidden" name="{{ facet.key }}" value="{{ item.label }}">
+      {% endfor %}
+    {% endfor %}
+    {% for cid in compare %}
+      <input type="hidden" name="compare" value="{{ cid }}">
+    {% endfor %}
+    <input type="search" id="series-q" name="q" value="{{ q }}"
+           placeholder="{{ _('Buscar series de tiempo…') }}"
+           aria-label="{{ _('Buscar series de tiempo') }}" autocomplete="off">
+    <button type="submit" class="btn btn-primary">{{ _('Buscar') }}</button>
+  </form>
+{% endmacro %}
+
+{# ── Chips de tema (landing y estado vacío) ── #}
+{% macro topic_chip_list() %}
+  <div class="gobar-topic-chips">
+    {% for chip in topic_chips %}
+      <a class="gobar-topic-chip" href="{{ chip.href }}">{{ chip.label }}</a>
+    {% endfor %}
+  </div>
+{% endmacro %}
+
+{% block content %}
+<div id="gobar-series" class="gobar-series">
+
+  {# ════════════════════════ LANDING ════════════════════════ #}
+  {% if mode == 'landing' %}
+    <section class="gobar-series-hero">
+      <h1 class="gobar-series-hero-title">{{ _('Series de Tiempo') }}</h1>
+      <p class="gobar-series-hero-sub">{{ _('Buscá, explorá y compará series.') }}</p>
+      {{ search_form() }}
+    </section>
+
+    {% if error %}
+      <div class="gobar-series-status">
+        {{ _('No se pudo conectar con la API de series. Reintentá más tarde.') }}
+      </div>
+    {% endif %}
+
+  {# ════════════════════ FOCUS COMPARE ═══════════════════════ #}
+  {% elif mode == 'focus_compare' %}
+    <section class="gobar-series-topbar">
+      {{ search_form(compact=True) }}
+    </section>
+
+    {% if error %}
+      <div class="gobar-series-status">
+        {{ _('No se pudo conectar con la API de series. Reintentá más tarde.') }}
+      </div>
+    {% else %}
+      <div class="gobar-focus-layout">
+        <div class="gobar-focus-side">
+          <h2 class="gobar-section-title">{{ _('Series en comparación') }}</h2>
+          <ul class="gobar-compare-list">
+            {% for item in compare_items %}
+              <li class="gobar-compare-item">
+                <span class="serie-dot serie-dot--{{ (loop.index0 % 4) + 1 }}" aria-hidden="true"></span>
+                <span class="gobar-compare-item-body">
+                  <span class="gobar-compare-item-title">{{ item.title }}</span>
+                  {% if item.publisher %}<span class="gobar-compare-item-pub">{{ item.publisher }}</span>{% endif %}
+                </span>
+                <a class="gobar-compare-remove" href="{{ item.remove_href }}"
+                   title="{{ _('Quitar de la comparación') }}"
+                   aria-label="{{ _('Quitar {t} de la comparación').format(t=item.title) }}">&times;</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="gobar-focus-main">
+          {% if compare_graphic_url %}
+            <div id="gobar-compare-chart" class="gobar-compare-chart gobar-compare-chart--large"
+                 data-graphic-url="{{ compare_graphic_url }}"></div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+  {# ═════════════════════════ RESULTS ════════════════════════ #}
+  {% else %}
+    <section class="gobar-series-topbar">
+      {{ search_form(compact=True) }}
+    </section>
+
+    {% if error %}
+      <div class="gobar-series-status">
+        {{ _('No se pudo conectar con la API de series. Reintentá más tarde.') }}
+      </div>
+    {% elif count == 0 %}
+      <div class="gobar-series-empty">
+        <svg class="gobar-series-empty-icon" width="64" height="64" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+        </svg>
+        <h2 class="gobar-series-empty-title">
+          {% if q %}
+            {{ _('No encontramos series para “{q}”').format(q=q) }}
+          {% else %}
+            {{ _('No encontramos series con estos filtros') }}
+          {% endif %}
+        </h2>
+        <p class="gobar-series-empty-copy">
+          {{ _('Probá con otras palabras, quitá algún filtro o explorá por tema.') }}
+        </p>
+        {{ topic_chip_list() }}
+      </div>
+    {% else %}
+      <div class="gobar-results-layout">
+
+        {# ── Sidebar de filtros ── #}
+        <aside class="gobar-series-facets" aria-label="{{ _('Filtros') }}">
+          {% for facet in facets %}
+            <section class="module module-narrow module-shallow gobar-facet">
+              <details class="gobar-facet-details" open>
+                <summary class="gobar-facet-summary">
+                  <h2 class="module-heading">{{ facet.title }}</h2>
+                </summary>
+                <nav aria-label="{{ facet.title }}">
+                  <ul class="list-unstyled nav nav-simple nav-facet">
+                    {% for item in facet['items'] %}
+                      <li class="nav-item{% if item.active %} active{% endif %}">
+                        <a href="{{ item.href }}" title="{{ item.label }}">
+                          <span class="item-label">{{ item.label }}</span>
+                          <span class="item-count badge">{{ item.count }}</span>
+                          {% if item.active %}<span class="facet-close"> <i class="fa fa-solid fa-circle-xmark"></i></span>{% endif %}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </nav>
+              </details>
+            </section>
+          {% endfor %}
+        </aside>
+
+        {# ── Lista de resultados ── #}
+        <div class="gobar-series-results">
+          <div class="gobar-series-toolbar">
+            <span class="gobar-series-summary">
+              {% if count %}{{ _('{count} series encontradas').format(count=count) }}{% endif %}
+            </span>
+            <div class="gobar-series-sort">
+              <span class="gobar-series-sort-label">{{ _('Ordenar por') }}</span>
+              {% for option in sort_options %}
+                <a href="{{ option.href }}"
+                   class="gobar-series-sort-link{% if option.active %} active{% endif %}"
+                   {% if option.active %}aria-current="true"{% endif %}>{{ option.label }}</a>
+              {% endfor %}
+            </div>
+          </div>
+
+          {% if compare %}
+            <div class="gobar-compare-bar">
+              <span class="gobar-compare-bar-count">
+                {{ _('{n} serie(s) seleccionada(s) para comparar').format(n=compare|length) }}
+              </span>
+              {% if compare|length >= 2 %}
+                <a class="btn btn-primary" href="{{ compare_full_href }}">{{ _('Comparar') }}</a>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          <ul class="gobar-series-list">
+            {% for result in results %}
+              <li class="gobar-serie-row{% if result.in_compare %} is-selected{% endif %}">
+                <a class="gobar-serie-check" href="{{ result.compare_toggle_href }}"
+                   aria-label="{% if result.in_compare %}{{ _('Quitar de la comparación') }}{% else %}{{ _('Agregar a la comparación') }}{% endif %}">
+                  <span class="gobar-serie-checkbox" aria-hidden="true"></span>
+                </a>
+                <a class="gobar-serie-main" href="{{ result.href }}">
+                  <span class="gobar-serie-title">{{ result.description or result.title }}</span>
+                  <span class="gobar-serie-meta">
+                    {% if result.publisher %}{{ result.publisher }}{% endif %}
+                    {% if result.frequency_label %}<span class="gobar-serie-meta-sep">·</span>{{ result.frequency_label }}{% endif %}
+                    {% if result.units %}<span class="gobar-serie-meta-sep">·</span>{{ result.units }}{% endif %}
+                  </span>
+                  {% if result.dataset_title or result.date_start or result.date_end %}
+                    <span class="gobar-serie-meta gobar-serie-meta-sub">
+                      {% if result.dataset_title %}{{ result.dataset_title }}{% endif %}
+                      {% if result.date_start or result.date_end %}
+                        <span class="gobar-serie-meta-sep">·</span>{{ result.date_start or '' }}{% if result.date_start and result.date_end %} – {% endif %}{{ result.date_end or '' }}
+                      {% endif %}
+                    </span>
+                  {% endif %}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <nav class="gobar-series-pagination" aria-label="{{ _('Paginación') }}">
+            {% if prev_url %}
+              <a href="{{ prev_url }}" class="gobar-series-pagebtn btn">{{ _('Anterior') }}</a>
+            {% else %}
+              <span class="gobar-series-pagebtn btn disabled" aria-disabled="true">{{ _('Anterior') }}</span>
+            {% endif %}
+            <span class="gobar-series-pagepos">{{ _('Página {page} de {pages}').format(page=page, pages=pages) }}</span>
+            {% if next_url %}
+              <a href="{{ next_url }}" class="gobar-series-pagebtn btn">{{ _('Siguiente') }}</a>
+            {% else %}
+              <span class="gobar-series-pagebtn btn disabled" aria-disabled="true">{{ _('Siguiente') }}</span>
+            {% endif %}
+          </nav>
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script type="text/javascript"
+          src="https://cdn.jsdelivr.net/gh/datosgobar/series-tiempo-ar-explorer@ts_components_2.9.0/dist/js/components.js"
+          integrity="sha384-+OYujdlnHhlZLbDmM2Ta+D4mY7mRvQTHIvLndawcDwkfTseKR1WLZ8WUELe3PQN4" crossorigin="anonymous"></script>
+  {% if compare_graphic_url and not error %}
+    <script type="text/javascript">
+      // Único JS de la página: montar el gráfico compartido de Poncho
+      // (TSComponents.Graphic) con TODAS las series en comparación. Sin fetch,
+      // sin estado, sin listeners: el graphicUrl ya viene armado (ids coma-
+      // separados) del backend y agregar/sacar series recarga la página.
+      (function () {
+        var el = document.getElementById('gobar-compare-chart');
+        if (!el || !window.TSComponents || !TSComponents.Graphic) return;
+        TSComponents.Graphic.render(el.id, {
+          graphicUrl: el.getAttribute('data-graphic-url'),
+          legendField: 'title',
+          zoom: true,
+          navigator: true,
+          datePickerEnabled: true,
+          // Mismo orden fijo que --gobar-serie-1..4 (series-explorer.css) y
+          // .serie-dot--1..4: los puntos de la lista tienen que coincidir
+          // con las líneas del gráfico.
+          colors: ['#B369ED', '#1baf7a', '#eda100', '#2a78d6'],
+          // Evita el crossfade de etiquetas del eje X al cambiar de rango,
+          // que hacía que el eje viejo y el nuevo se vieran superpuestos.
+          chartOptions: { xAxis: { labels: { animate: false } } }
+        });
+      })();
+    </script>
+  {% endif %}
+{% endblock %}

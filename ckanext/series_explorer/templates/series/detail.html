@@ -1,0 +1,126 @@
+{% extends "page.html" %}
+
+{% block subtitle %}{{ page_title }}{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  {% asset 'series_explorer/series_explorer_css' %}
+  {# Poncho TSComponents (Graphic) + FontAwesome 5 que requiere. Recursos
+     externos: se cargan por CDN, no son bundleables por webassets. #}
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/gh/datosgobar/series-tiempo-ar-explorer@ts_components_2.9.0/dist/css/components.css"
+        integrity="sha384-tkchXtqoA5SypC6EEzm6Sou4DjQOwr59yrmv2WabofpCThBgUQ7aTWSV9MZXxbge" crossorigin="anonymous">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css"
+        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+{% endblock %}
+
+{% block bodytag %}{{ super() }} class="series-page series-detail-page"{% endblock %}
+
+{% block content %}
+<div id="gobar-series" class="gobar-series gobar-detail">
+  {% if error %}
+    <div class="gobar-series-status">
+      {{ _('No se pudo conectar con la API de series. Reintentá más tarde.') }}
+    </div>
+  {% else %}
+    <nav class="gobar-detail-breadcrumb" aria-label="{{ _('Ruta de navegación') }}">
+      <a href="{{ h.url_for('series.series') }}">{{ _('Series') }}</a>
+      {% if breadcrumb_theme %}
+        <span class="gobar-detail-crumb-sep">›</span>
+        {# El backend no arma el href de tema para el breadcrumb; queda solo texto. #}
+        <span class="gobar-detail-crumb">{{ breadcrumb_theme }}</span>
+      {% endif %}
+      <span class="gobar-detail-crumb-sep">›</span>
+      <span class="gobar-detail-crumb is-current">{{ title }}</span>
+    </nav>
+
+    <header class="gobar-detail-head">
+      <div class="gobar-detail-head-main">
+        <h1 class="gobar-detail-title">{{ title }}</h1>
+        {% if code %}<span class="gobar-detail-code mono">{{ code }}</span>{% endif %}
+        {% if source %}<span class="gobar-detail-source">{{ source }}</span>{% endif %}
+      </div>
+      <div class="gobar-detail-actions">
+        <a class="btn gobar-btn-outline" href="{{ add_to_compare_href }}">{{ _('+ Agregar a comparación') }}</a>
+        <a class="btn btn-primary" href="{{ csv_url }}">{{ _('Descargar CSV') }}</a>
+      </div>
+    </header>
+
+    <div class="gobar-detail-chart" id="gobar-detail-chart"
+         data-graphic-url="{{ graphic_url }}" data-title="{{ title }}"></div>
+
+    <div class="gobar-detail-cards">
+      <section class="gobar-detail-card">
+        <h2 class="gobar-detail-card-title">{{ _('Metadata') }}</h2>
+        <dl class="gobar-detail-dl">
+          {% if theme %}<dt>{{ _('Tema') }}</dt><dd>{{ theme }}</dd>{% endif %}
+          {% if units %}<dt>{{ _('Unidades') }}</dt><dd>{{ units }}</dd>{% endif %}
+          {% if frequency_label %}<dt>{{ _('Frecuencia') }}</dt><dd>{{ frequency_label }}</dd>{% endif %}
+          {% if dataset_title %}<dt>{{ _('Dataset') }}</dt><dd>{{ dataset_title }}</dd>{% endif %}
+          {% if issued %}<dt>{{ _('Fecha de publicación') }}</dt><dd>{{ issued }}</dd>{% endif %}
+          {% if date_start or date_end %}
+            <dt>{{ _('Cobertura temporal') }}</dt>
+            <dd>
+              {{ date_start or '' }}{% if date_start and date_end %} – {% endif %}{{ date_end or '' }}
+              {% if value_count %}<span class="gobar-detail-dl-note">({{ _('{n} valores').format(n=value_count) }})</span>{% endif %}
+            </dd>
+          {% endif %}
+        </dl>
+      </section>
+
+      <section class="gobar-detail-card gobar-detail-usage">
+        <h2 class="gobar-detail-card-title">{{ _('Uso') }}</h2>
+        {% if last_value %}
+          <div class="gobar-detail-usage-block">
+            <span class="gobar-detail-usage-label">{{ _('Último valor') }}</span>
+            <span class="gobar-detail-usage-stat mono">{{ last_value }}</span>
+          </div>
+        {% endif %}
+        <div class="gobar-detail-usage-block">
+          <span class="gobar-detail-usage-label">{{ _('Consultas últimos 90 días') }}</span>
+          <span class="gobar-detail-usage-stat mono">{{ hits_90_days or 0 }}</span>
+        </div>
+        {% if hits_total %}
+          <div class="gobar-detail-usage-block">
+            <span class="gobar-detail-usage-label">{{ _('Consultas totales') }}</span>
+            <span class="gobar-detail-usage-stat mono">{{ hits_total }}</span>
+          </div>
+        {% endif %}
+      </section>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script type="text/javascript"
+          src="https://cdn.jsdelivr.net/gh/datosgobar/series-tiempo-ar-explorer@ts_components_2.9.0/dist/js/components.js"
+          integrity="sha384-+OYujdlnHhlZLbDmM2Ta+D4mY7mRvQTHIvLndawcDwkfTseKR1WLZ8WUELe3PQN4" crossorigin="anonymous"></script>
+  {% if not error and graphic_url %}
+    <script type="text/javascript">
+      // Único JS: montar el gráfico grande de Poncho (TSComponents.Graphic)
+      // sobre el graphic_url ya armado por el backend. Sin fetch ni estado.
+      (function () {
+        var el = document.getElementById('gobar-detail-chart');
+        if (!el || !window.TSComponents || !TSComponents.Graphic) return;
+        TSComponents.Graphic.render(el.id, {
+          graphicUrl: el.getAttribute('data-graphic-url'),
+          title: el.getAttribute('data-title'),
+          zoom: true,
+          navigator: true,
+          datePickerEnabled: true,
+          frequencySelector: true,
+          exportable: true,
+          // Violeta de marca, consistente con el color primario del sitio.
+          colors: ['#B369ED'],
+          // Sin esto, al cambiar de rango (1m/1y/Todo) Highcharts hace un
+          // crossfade entre las etiquetas viejas y las nuevas del eje X, y
+          // durante esa transición se superponen y se ven amontonadas.
+          chartOptions: { xAxis: { labels: { animate: false } } }
+        });
+      })();
+    </script>
+  {% endif %}
+{% endblock %}
