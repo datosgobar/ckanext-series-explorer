@@ -1,4 +1,5 @@
 series_explorer_css:
+  filters: cssrewrite
   output: series-explorer/%(version)s_series_explorer.css
   contents:
     - css/series-explorer.css

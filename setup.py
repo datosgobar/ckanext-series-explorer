@@ -1,18 +1,21 @@
-from setuptools import setup, find_packages
+# -*- coding: utf-8 -*-
+from setuptools import setup
+
+# Note: Do not add new arguments to setup(), instead add setuptools
+# configuration options to setup.cfg, or any other project information
+# to pyproject.toml
+# See https://github.com/ckan/ckan/issues/8382 for details
 
 setup(
-    name='ckanext-series_explorer',
-    packages=find_packages(),
-    entry_points={
-        'ckan.plugins': [
-            'series_explorer=ckanext.series_explorer.plugin:SeriesExplorerPlugin'
-        ]
-    },
+    # If you are changing from the default layout of your extension, you may
+    # have to change the message extractors, you can read more about babel
+    # message extraction at
+    # http://babel.pocoo.org/docs/messages/#extraction-method-mapping-and-configuration
     message_extractors={
         'ckanext': [
             ('**.py', 'python', None),
-            ('**.html', 'jinja2', None),
-        ]
-    },
-    i18n_domain='ckanext-series_explorer',
+            ('**.js', 'javascript', None),
+            ('**/templates/**.html', 'ckan', None),
+        ],
+    }
 )

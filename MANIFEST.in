@@ -1,5 +1,6 @@
 include README.md
 include LICENSE
 include requirements.txt
-recursive-include ckanext/series_explorer *.html *.json *.js *.css *.mo *.yml
+recursive-include ckanext/series_explorer *.html *.json *.js *.less *.css *.mo *.yml
+recursive-include ckanext/series_explorer/migration *.ini *.py *.mako
 recursive-include ckanext/series_explorer/public *.*

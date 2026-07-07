@@ -10,12 +10,13 @@ license = {text = "AGPL"}
 classifiers = [
     "Development Status :: 4 - Beta",
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
-keywords = [ "CKAN", "series de tiempo", "datos abiertos" ]
+keywords = [ "CKAN", "series", "de", "tiempo", "datos", "abiertos" ]
 dependencies = [ "requests" ]
 
 [project.urls]
@@ -26,7 +27,7 @@ series_explorer = "ckanext.series_explorer.plugin:SeriesExplorerPlugin"
 
 
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools<82"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
