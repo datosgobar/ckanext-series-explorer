@@ -1,42 +1,43 @@
 ckanext-series-explorer
 ========================
 
-This extension adds a `/series` page to CKAN: a search, comparison and
-detail viewer for time series data from Argentina's national
-[Time Series API](https://apis.datos.gob.ar/series/api/) (`apis.datos.gob.ar/series`).
+Esta extensión agrega una página `/series` a CKAN: un buscador, comparador y
+visualizador de detalle para series de tiempo de la
+[API Series de Tiempo](https://apis.datos.gob.ar/series/api/) de Argentina
+(`apis.datos.gob.ar/series`).
 
-Features:
+Funcionalidades:
 
-* Free-text search with facets (theme, source, publisher, unit).
-* Select several series and compare them on one chart.
-* Series detail page with chart, metadata and CSV download.
+* Búsqueda de texto libre con filtros (tema, fuente, publicador, unidad).
+* Selección de varias series para compararlas en un mismo gráfico.
+* Página de detalle por serie, con gráfico, metadata y descarga de CSV.
 
-Charts are rendered with the native
-[Poncho `TSComponents.Graphic`](https://github.com/datosgobar/series-tiempo-ar-explorer)
-component, loaded from CDN. The extension does not use any local dataset —
-all data is fetched live from the public national API.
+Los gráficos se renderizan con el componente nativo
+[Poncho `TSComponents.Graphic`](https://github.com/datosgobar/series-tiempo-ar-explorer),
+cargado por CDN. La extensión no usa ningún dataset local — todos los datos
+se consultan en vivo contra la API pública nacional.
 
-Tested on CKAN 2.11.
+Probado en CKAN 2.11.
 
-## Installation
+## Instalación
 
-Use `pip` to install this plugin, assuming you have
-[set up a virtualenv](http://docs.ckan.org/en/latest/maintaining/installing/install-from-source.html#install-ckan-into-a-python-virtual-environment):
+Usá `pip` para instalar este plugin, asumiendo que ya
+[armaste un virtualenv](http://docs.ckan.org/en/latest/maintaining/installing/install-from-source.html#install-ckan-into-a-python-virtual-environment):
 
 ```
 pip install -e 'git+https://github.com/datosgobar/ckanext-series-explorer.git#egg=ckanext-series-explorer'
 pip install -r requirements.txt
 ```
 
-Add `series_explorer` to `ckan.plugins` in your config file:
+Agregá `series_explorer` a `ckan.plugins` en tu archivo de configuración:
 
 ```
 ckan.plugins = series_explorer
 ```
 
-## Configuration
+## Configuración
 
-None at present — the API endpoints are fixed in `views.py`
+Ninguna por el momento — los endpoints de la API están fijos en `views.py`
 (`SERIES_API_URL` / `SERIES_METADATA_URL`).
 
 ## Tests
@@ -44,8 +45,3 @@ None at present — the API endpoints are fixed in `views.py`
 ```
 pytest --ckan-ini=test.ini
 ```
-
-## License
-
-Released under the GNU Affero General Public License (AGPL) v3.0. See the
-file `LICENSE` for details.
