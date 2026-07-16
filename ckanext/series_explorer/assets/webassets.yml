@@ -1,5 +1,8 @@
+# Sin cssrewrite: el filtro del scaffold rompe el build del bundle en prod
+# (debug=False) porque CKAN no registra url mapping para los assets de
+# extensiones ("Cannot determine url for ..."). El único url() del CSS es un
+# @import absoluto de Google Fonts, así que no hay nada que reescribir.
 series_explorer_css:
-  filters: cssrewrite
   output: series-explorer/%(version)s_series_explorer.css
   contents:
     - css/series-explorer.css
