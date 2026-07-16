@@ -326,4 +326,20 @@ body.series-page .gobar-facet nav .nav-facet .nav-item > a {
 body.series-page .gobar-facet nav .nav-facet .nav-item > a:hover {
   background: var(--gobar-gris-bg, #f2f2f2); border-radius: 6px; text-decoration: none;
 }
+/* Item activo: pill limpio en vez del "banderín" con punta de CKAN core */
+body.series-page .gobar-facet nav .nav-facet .nav-item.active > a {
+  background: var(--gobar-primary, #393793); color: #fff;
+  border-radius: 6px; margin: 0;
+}
+body.series-page .gobar-facet nav .nav-facet .nav-item.active > a::before,
+body.series-page .gobar-facet nav .nav-facet .nav-item.active > a::after {
+  content: none;
+}
+body.series-page .gobar-facet nav .nav-facet .nav-item.active > a:hover {
+  background: var(--gobar-navy, #212D51);
+}
+body.series-page .gobar-facet .nav-facet .nav-item.active .item-count.badge {
+  background: rgba(255, 255, 255, 0.25); color: #fff;
+}
+body.series-page .gobar-facet .nav-facet .nav-item.active .facet-close { color: rgba(255, 255, 255, 0.85); }
 body.series-page .gobar-facet .module-footer { padding: 0 0.5rem 0.5rem; }
