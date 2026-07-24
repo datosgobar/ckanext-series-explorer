@@ -331,10 +331,11 @@ body.series-page .gobar-facet nav .nav-facet .nav-item > a {
 body.series-page .gobar-facet nav .nav-facet .nav-item > a:hover {
   background: var(--gobar-gris-bg, #f2f2f2); border-radius: 6px; text-decoration: none;
 }
-/* Item activo: pill limpio en vez del "banderín" con punta de CKAN core */
+/* Item activo: chip chato en vez del "banderín" con punta de CKAN core.
+   Contador y cierre como texto plano — nada de sub-pills adentro del chip. */
 body.series-page .gobar-facet nav .nav-facet .nav-item.active > a {
   background: var(--gobar-primary, #393793); color: #fff;
-  border-radius: 6px; margin: 0;
+  border-radius: 4px; margin: 0; padding: 0.3rem 0.6rem;
 }
 body.series-page .gobar-facet nav .nav-facet .nav-item.active > a::before,
 body.series-page .gobar-facet nav .nav-facet .nav-item.active > a::after {
@@ -344,7 +345,11 @@ body.series-page .gobar-facet nav .nav-facet .nav-item.active > a:hover {
   background: var(--gobar-navy, #212D51);
 }
 body.series-page .gobar-facet .nav-facet .nav-item.active .item-count.badge {
-  background: rgba(255, 255, 255, 0.25); color: #fff;
+  background: none; border-radius: 0; padding: 0;
+  color: rgba(255, 255, 255, 0.65); font-weight: 600; font-size: 0.8em;
 }
-body.series-page .gobar-facet .nav-facet .nav-item.active .facet-close { color: rgba(255, 255, 255, 0.85); }
+body.series-page .gobar-facet .nav-facet .nav-item.active .facet-close {
+  color: rgba(255, 255, 255, 0.7); font-size: 0.85em;
+}
+body.series-page .gobar-facet .nav-facet .nav-item.active > a:hover .facet-close { color: #fff; }
 body.series-page .gobar-facet .module-footer { padding: 0 0.5rem 0.5rem; }
