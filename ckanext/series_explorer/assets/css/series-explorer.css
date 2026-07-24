@@ -95,6 +95,11 @@ body.series-page .gobar-topic-chip {
 }
 body.series-page .gobar-topic-chip:hover { background: rgba(57, 55, 147, .16); }
 
+body.series-page .gobar-series-hints { text-align: center; margin: 8px 0 32px; }
+body.series-page .gobar-series-hints-label {
+  color: var(--gobar-gris-oscuro); font-size: 0.85rem; margin: 0 0 4px;
+}
+
 /* ── Barra superior (resultados / comparación enfocada) ── */
 body.series-page .gobar-series-topbar { margin-bottom: 24px; }
 body.series-page .gobar-series-search--compact input[type="search"] { border-width: 1.5px; }
