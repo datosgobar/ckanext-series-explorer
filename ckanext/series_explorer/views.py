@@ -20,7 +20,7 @@ series_bp = Blueprint(
 
 SERIES_API_URL = "https://apis.datos.gob.ar/series/api/search/"
 SERIES_PER_PAGE = 12
-SERIES_SORT_OPTIONS = ("relevance", "hits_90_days", "frequency")
+SERIES_SORT_OPTIONS = ("relevance", "frequency")
 SERIES_FACETS = (
     ("dataset_theme", "Tema"),
     ("dataset_source", "Fuente"),
@@ -195,7 +195,12 @@ def _series_meta_common(entry):
 
 def _series_topic_chips():
     return [
-        {"label": label, "href": _series_build_url({"dataset_theme": [label]})}
+        {
+            "label": label,
+            # ponytail: limpia `q` para que el chip arranque una búsqueda
+            # nueva por tema en vez de heredar un texto que ya dio 0 resultados.
+            "href": _series_build_url({"dataset_theme": [label], "q": None}),
+        }
         for label in SERIES_TOPIC_CHIPS
     ]
 
@@ -319,7 +324,6 @@ def series():
 
     sort_labels = {
         "relevance": "Relevancia",
-        "hits_90_days": "Más consultadas",
         "frequency": "Frecuencia",
     }
     sort_options = [

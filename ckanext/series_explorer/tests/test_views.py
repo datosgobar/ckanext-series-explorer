@@ -141,6 +141,18 @@ def test_series_detail_404_cuando_api_responde_400(app, monkeypatch):
     assert resp.status_code == 404
 
 
+def test_series_topic_chips_limpia_busqueda_fallida(app):
+    with app.flask_app.test_request_context("/series/?q=texto-sin-resultados"):
+        chips = views._series_topic_chips()
+        assert chips  # SERIES_TOPIC_CHIPS no está vacío
+        for chip in chips:
+            assert "q=" not in chip["href"]
+
+
+def test_series_sort_options_sin_mas_consultadas():
+    assert "hits_90_days" not in views.SERIES_SORT_OPTIONS
+
+
 def test_series_compare_parse_ambos_formatos(app):
     # ?compare=a,b y ?compare=a&compare=b deben parsear igual.
     for qs in ("/series/?compare=a,b", "/series/?compare=a&compare=b"):
