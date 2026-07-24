@@ -275,15 +275,47 @@ body.series-page .gobar-detail-usage-label { display: block; font-size: 0.72rem;
 body.series-page .gobar-detail-usage-stat { display: block; font-size: 1.5rem; font-weight: 700; color: var(--gobar-navy); margin-top: 2px; }
 
 /* ══════════════════════ RESPONSIVE ══════════════════════
-   Mobile: los filtros NO se anteponen a los resultados. En vez de columnas,
-   apilamos y usamos `order` para que la lista de resultados vaya primero, luego
-   comparación, y los filtros al final. */
+   Mobile: filtros primero (colapsados por default, ver drawer más abajo),
+   después la lista de resultados. Apilamos y usamos `order`. */
 @media (max-width: 900px) {
   body.series-page .gobar-results-layout,
   body.series-page .gobar-focus-layout { grid-template-columns: 1fr; }
-  body.series-page .gobar-series-results { order: 1; }
-  body.series-page .gobar-series-facets { order: 2; }
+  body.series-page .gobar-series-facets { order: 1; margin-bottom: 16px; }
+  body.series-page .gobar-series-results { order: 2; }
   body.series-page .gobar-compare-bar { flex-wrap: wrap; }
+}
+
+/* ── Drawer "Filtros" (mobile) ── checkbox-hack: sin JS, y a diferencia de
+   <details> un <div> sí se puede forzar visible por CSS en desktop
+   (un <details> cerrado usa content-visibility interno en Chrome, que
+   ignora display:block puesto en los hijos). */
+body.series-page .gobar-series-facets-toggle-input {
+  position: absolute; opacity: 0; pointer-events: none;
+}
+body.series-page .gobar-series-facets-toggle {
+  cursor: pointer; user-select: none;
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.6rem 0.75rem; margin-bottom: 0.5rem;
+  background: var(--gobar-gris-bg, #f2f2f2); border-radius: 6px;
+  font-family: var(--font-titulos); font-weight: 700; font-size: 0.95rem;
+  color: var(--gobar-navy, #212D51);
+}
+body.series-page .gobar-series-facets-toggle-input:focus-visible + .gobar-series-facets-toggle {
+  outline: 2px solid var(--gobar-primary, #393793); outline-offset: 2px;
+}
+body.series-page .gobar-series-facets-toggle::after {
+  content: ""; flex: none; width: 0.5rem; height: 0.5rem; margin-left: auto;
+  border-right: 2px solid var(--gobar-gris, #888); border-bottom: 2px solid var(--gobar-gris, #888);
+  transform: translateY(-2px) rotate(45deg); transition: transform 0.2s ease;
+}
+body.series-page .gobar-series-facets-toggle-input:checked + .gobar-series-facets-toggle::after {
+  transform: translateY(2px) rotate(225deg);
+}
+body.series-page .gobar-series-facets-content { display: none; }
+body.series-page .gobar-series-facets-toggle-input:checked ~ .gobar-series-facets-content { display: block; }
+@media (min-width: 901px) {
+  body.series-page .gobar-series-facets-toggle { display: none; }
+  body.series-page .gobar-series-facets-content { display: block; }
 }
 
 /* ══════════════════════ FACETAS (sidebar de filtros) ══════════════════════
@@ -349,6 +381,11 @@ body.series-page .gobar-facet .nav-facet .nav-item.active .item-count.badge {
   color: rgba(255, 255, 255, 0.65); font-weight: 600; font-size: 0.8em;
 }
 body.series-page .gobar-facet .nav-facet .nav-item.active .facet-close {
+  /* CKAN core la posiciona con float:right + left:10px pensado para el
+     "banderín" viejo; en el chip flex chato eso la empuja justo al borde
+     redondeado y queda tapada por la curva. La volvemos a la posición
+     natural del flujo flex. */
+  float: none; position: static; left: 0;
   color: rgba(255, 255, 255, 0.7); font-size: 0.85em;
 }
 body.series-page .gobar-facet .nav-facet .nav-item.active > a:hover .facet-close { color: #fff; }

@@ -138,30 +138,38 @@
     {% else %}
       <div class="gobar-results-layout">
 
-        {# ── Sidebar de filtros ── #}
+        {# ── Sidebar de filtros ──
+        En mobile va primero (order en CSS) y arranca colapsada. Checkbox-hack
+        en vez de <details> anidado: forzar visible en desktop un <details>
+        cerrado no anda (Chrome lo renderiza con content-visibility interno,
+        no respeta display:block en los hijos), un <div> sí. #}
         <aside class="gobar-series-facets" aria-label="{{ _('Filtros') }}">
-          {% for facet in facets %}
-            <section class="module module-narrow module-shallow gobar-facet">
-              <details class="gobar-facet-details" open>
-                <summary class="gobar-facet-summary">
-                  <h2 class="module-heading">{{ facet.title }}</h2>
-                </summary>
-                <nav aria-label="{{ facet.title }}">
-                  <ul class="list-unstyled nav nav-simple nav-facet">
-                    {% for item in facet['items'] %}
-                      <li class="nav-item{% if item.active %} active{% endif %}">
-                        <a href="{{ item.href }}" title="{{ item.label }}">
-                          <span class="item-label">{{ item.label }}</span>
-                          <span class="item-count badge">{{ item.count }}</span>
-                          {% if item.active %}<span class="facet-close"> <i class="fa fa-solid fa-xmark" aria-hidden="true"></i></span>{% endif %}
-                        </a>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                </nav>
-              </details>
-            </section>
-          {% endfor %}
+          <input type="checkbox" id="series-facets-toggle" class="gobar-series-facets-toggle-input">
+          <label for="series-facets-toggle" class="gobar-series-facets-toggle">{{ _('Filtros') }}</label>
+          <div class="gobar-series-facets-content">
+            {% for facet in facets %}
+              <section class="module module-narrow module-shallow gobar-facet">
+                <details class="gobar-facet-details" open>
+                  <summary class="gobar-facet-summary">
+                    <h2 class="module-heading">{{ facet.title }}</h2>
+                  </summary>
+                  <nav aria-label="{{ facet.title }}">
+                    <ul class="list-unstyled nav nav-simple nav-facet">
+                      {% for item in facet['items'] %}
+                        <li class="nav-item{% if item.active %} active{% endif %}">
+                          <a href="{{ item.href }}" title="{{ item.label }}">
+                            <span class="item-label">{{ item.label }}</span>
+                            <span class="item-count badge">{{ item.count }}</span>
+                            {% if item.active %}<span class="facet-close"> <i class="fa fa-solid fa-xmark" aria-hidden="true"></i></span>{% endif %}
+                          </a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </nav>
+                </details>
+              </section>
+            {% endfor %}
+          </div>
         </aside>
 
         {# ── Lista de resultados ── #}
